@@ -34,6 +34,8 @@
         let y = canvas.height - 30;
         let rightPressed = false;
         let leftPressed = false;
+        let interval = 0;
+
 
         let dx = 2;
         let dy = -2;
@@ -80,8 +82,16 @@
             drawBall();
             drawPaddle();
 
-            if (y + dy > canvas.height - ballRadius || y + dy < ballRadius) {
+            if (y + dy < ballRadius) {
                 dy = -dy;
+                } else if (y + dy > canvas.height - ballRadius) {
+                    if (x > paddleX && x < paddleX + paddleWidth){
+                        dy = -dy;
+                    } else {
+                alert("GAME OVER");
+                document.location.reload();
+                clearInterval(interval); 
+                }
             }
 
             if (x + dx > canvas.width - ballRadius || x + dx < ballRadius){
@@ -100,7 +110,7 @@
         }
 
         function startGame(){
-            setInterval(draw, 10);
+            interval = setInterval(draw, 10);
         }
 
         document.getElementById("runButton").addEventListener("click", function () {
