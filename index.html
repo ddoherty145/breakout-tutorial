@@ -71,6 +71,7 @@
         let leftPressed = false;
         let interval = 0;
         let score = 0;
+        let lives = 3;
 
 
         let dx = 2;
@@ -120,7 +121,7 @@
                             if (score === brickRowCount * brickColumnCount) {
                                 alert("YOU WIN, CONGRATULATIONS!");
                                 document.location.reload();
-                                clearInterval(interval);
+            
                             }
                         }
                     }
@@ -132,6 +133,12 @@
             ctx.font = "16px Arial";
             ctx.fillStyle = "#0095DD";
             ctx.fillText(`Score: ${score}`, 8, 20);
+        }
+
+        function drawLives() {
+            ctx.font = "16px Arial";
+            ctx.fillStyle = "#0095DD";
+            ctx.fillText(`Lives: ${lives}`, canvas.width - 65, 20);
         }
 
         function drawPaddle(){
@@ -151,43 +158,56 @@
             
         }
 
-        function draw(){
+        function draw() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             drawBall();
             drawPaddle();
             drawBricks();
             collisionDetection();
             drawScore();
+            drawLives();
 
             if (y + dy < ballRadius) {
-                dy = -dy;
-                } else if (y + dy > canvas.height - ballRadius) {
-                    if (x > paddleX && x < paddleX + paddleWidth){
-                        dy = -dy;
+                dy = -dy; // Ball hits the top
+            } else if (y + dy > canvas.height - ballRadius) {
+                if (x > paddleX && x < paddleX + paddleWidth) {
+                    dy = -dy; // Ball hits the paddle
+                } else {
+                    lives--; // Player loses a life
+                    if (lives === 0) {
+                        alert("GAME OVER");
+                        document.location.reload();
+        
                     } else {
-                alert("GAME OVER");
-                document.location.reload();
-                clearInterval(interval); 
+                        // Reset ball and paddle positions
+                        x = canvas.width / 2;
+                        y = canvas.height - 30;
+                        dx = 2;
+                        dy = -2;
+                        paddleX = (canvas.width - paddleWidth) / 2;
+                    }
                 }
             }
 
-            if (x + dx > canvas.width - ballRadius || x + dx < ballRadius){
-                dx = -dx;
+            if (x + dx > canvas.width - ballRadius || x + dx < ballRadius) {
+                dx = -dx; // Ball hits side walls
             }
 
             if (rightPressed) {
-                paddleX = Math.min(paddleX + 7, canvas.width - paddleWidth);
+                paddleX = Math.min(paddleX + 7, canvas.width - paddleWidth); // Move paddle right
             } else if (leftPressed) {
-                paddleX = Math.max(paddleX - 7, 0);
+                paddleX = Math.max(paddleX - 7, 0); // Move paddle left
             }
 
             x += dx;
             y += dy;
 
+            requestAnimationFrame(draw);
         }
 
+
         function startGame(){
-            interval = setInterval(draw, 10);
+            draw();
         }
 
         document.getElementById("runButton").addEventListener("click", function () {
