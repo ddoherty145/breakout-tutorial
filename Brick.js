@@ -1,19 +1,10 @@
-class Brick {
-  constructor(x, y) {
-    this.x = x;
-    this.y = y;
-    this.status = 1;
-    this.width = 75;
-    this.height = 20;
-    this.color = 'tomato';
-  }
+import Sprite from './Sprite.js';
 
-  render(ctx) {
-    ctx.beginPath();
-    ctx.rect(this.x, this.y, this.width, this.height);
-    ctx.fillStyle = this.color;
-    ctx.fill();
-    ctx.closePath();
+class Brick extends Sprite {
+  constructor(x, y, width, height, color = 'tomato', status = 1) {
+    super(x, y, width, height, color);
+    this.status = status;
+    this.color = color;
   }
 }
 

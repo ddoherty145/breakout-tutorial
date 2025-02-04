@@ -2,8 +2,9 @@
 /*  eslint no-undef: "error" */
 /*  eslint no-alert: "error" */
 
+// eslint-disable-next-line no-undef
 export const canvas = document.getElementById('myCanvas');
-export const ctx = canvas.getContext('2d');
+export const ctx = canvas ? canvas.getContext('2d') : null;
 export const ballRadius = 10;
 export const paddleHeight = 10;
 export const paddleWidth = 75;

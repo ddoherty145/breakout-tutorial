@@ -1,21 +1,29 @@
+/* eslint-disable no-console */
 /* eslint-disable no-use-before-define */
 /*  global document, requestAnimationFrame */
 /*  eslint no-undef: "error" */
 /*  eslint no-alert: "error" */
 
-const canvas = document.getElementById('myCanvas');
-const ctx = canvas.getContext('2d');
-const ballRadius = 10;
-const paddleHeight = 10;
-const paddleWidth = 75;
+import {
+  canvas,
+  ctx,
+  ballRadius,
+  paddleHeight,
+  paddleWidth,
+  brickRowCount,
+  brickColumnCount,
+  brickWidth,
+  brickHeight,
+  brickPadding,
+  brickOffsetTop,
+  brickOffsetLeft,
+} from './constants.js';
 
-const brickRowCount = 3;
-const brickColumnCount = 5;
-const brickWidth = 75;
-const brickHeight = 20;
-const brickPadding = 10;
-const brickOffsetTop = 30;
-const brickOffsetLeft = 30;
+import Ball from './Ball.js';
+import Brick from './Brick.js';
+import Paddle from './Paddle.js';
+import Label from './Label.js';
+
 let gameOver = false;
 
 const bricks = [];
@@ -23,39 +31,27 @@ const bricks = [];
 for (let c = 0; c < brickColumnCount; c += 1) {
   bricks[c] = [];
   for (let r = 0; r < brickRowCount; r += 1) {
-    bricks[c][r] = { x: 0, y: 0, status: 1 };
+    const brickX = c * (brickWidth + brickPadding) + brickOffsetLeft;
+    const brickY = r * (brickHeight + brickPadding) + brickOffsetTop;
+    bricks[c][r] = new Brick(brickX, brickY, brickWidth, brickHeight, '#0095DD');
+    console.log(`Brick at [${c}][${r}] created at (${brickX}, ${brickY})`); // Debugging
   }
 }
 
-function drawBricks() {
-  for (let c = 0; c < brickColumnCount; c += 1) {
-    for (let r = 0; r < brickRowCount; r += 1) {
-      if (bricks[c][r].status === 1) {
-        const brickX = c * (brickWidth + brickPadding) + brickOffsetLeft;
-        const brickY = r * (brickHeight + brickPadding) + brickOffsetTop;
-        bricks[c][r].x = brickX;
-        bricks[c][r].y = brickY;
-        ctx.beginPath();
-        ctx.rect(brickX, brickY, brickWidth, brickHeight);
-        ctx.fillStyle = '#0095DD';
-        ctx.fill();
-        ctx.closePath();
-      }
-    }
-  }
-}
+const paddleX = (canvas.width - paddleWidth) / 2;
+const paddle = new Paddle(paddleX, canvas.height - paddleHeight, paddleWidth, paddleHeight, '#0095DD');
+console.log('Paddle initialized:', paddle); // Debugging
 
-let paddleX = (canvas.width - paddleWidth) / 2;
-let x = canvas.width / 2;
-let y = canvas.height - 30;
+const ball = new Ball(canvas.width / 2, canvas.height - 30, ballRadius, '#0095DD');
+
 let rightPressed = false;
 let leftPressed = false;
-// const interval = 0;
 let score = 0;
 let lives = 3;
 
-let dx = 2;
-let dy = -2;
+// Create labels for score and lives
+const scoreLabel = new Label(8, 20, `Score: ${score}`, '#0095DD', '16px Arial');
+const livesLabel = new Label(canvas.width - 65, 20, `Lives: ${lives}`, '#0095DD', '16px Arial');
 
 document.addEventListener('keydown', keyDownHandler, false);
 document.addEventListener('keyup', keyUpHandler, false);
@@ -80,23 +76,23 @@ function keyUpHandler(e) {
 function mouseMoveHandler(e) {
   const relativeX = e.clientX - canvas.offsetLeft;
   if (relativeX > 0 && relativeX < canvas.width) {
-    paddleX = relativeX - paddleWidth / 2;
+    paddle.x = relativeX - paddleWidth / 2;
   }
 }
 
 function collisionDetection() {
   for (let c = 0; c < brickColumnCount; c += 1) {
     for (let r = 0; r < brickRowCount; r += 1) {
-      const b = bricks[c][r];
-      if (b.status === 1) {
+      const brick = bricks[c][r];
+      if (brick.status === 1) {
         if (
-          x > b.x
-          && x < b.x + brickWidth
-          && y > b.y
-          && y < b.y + brickHeight
+          ball.x > brick.x
+          && ball.x < brick.x + brickWidth
+          && ball.y > brick.y
+          && ball.y < brick.y + brickHeight
         ) {
-          dy = -dy;
-          b.status = 0;
+          ball.dy = -ball.dy;
+          brick.status = 0;
           score += 1;
           if (score === brickRowCount * brickColumnCount) {
             gameOver = true;
@@ -107,88 +103,87 @@ function collisionDetection() {
   }
 }
 
-function drawScore() {
-  ctx.font = '16px Arial';
-  ctx.fillStyle = '#0095DD';
-  ctx.fillText(`Score: ${score}`, 8, 20);
-}
-
-function drawLives() {
-  ctx.font = '16px Arial';
-  ctx.fillStyle = '#0095DD';
-  ctx.fillText(`Lives: ${lives}`, canvas.width - 65, 20);
-}
-
-function drawPaddle() {
-  ctx.beginPath();
-  ctx.rect(paddleX, canvas.height - paddleHeight, paddleWidth, paddleHeight);
-  ctx.fillStyle = '#0095DD';
-  ctx.fill();
-  ctx.closePath();
-}
-
-function drawBall() {
-  ctx.beginPath();
-  ctx.arc(x, y, ballRadius, 0, Math.PI * 2);
-  ctx.fillStyle = '#0095DD';
-  ctx.fill();
-  ctx.closePath();
-}
-
 function draw() {
+  console.log('Drawing frame...'); // Debugging
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
   if (gameOver) {
-    ctx.font = '32px Arial';
-    ctx.fillStyle = '#0095DD';
-    ctx.fillText('GAME OVER!', 150, 150);
+    console.log('Game over!'); // Debugging
+    const gameOverLabel = new Label(150, 150, 'GAME OVER!', '#0095DD', '32px Arial');
+    gameOverLabel.render(ctx);
     return;
   }
 
-  drawBall();
-  drawPaddle();
-  drawBricks();
-  collisionDetection();
-  drawScore();
-  drawLives();
+  console.log('Drawing ball...'); // Debugging
+  if (ball && ball.draw) {
+    ball.draw(ctx);
+  } else {
+    console.error('Ball is undefined or does not have a draw method');
+  }
 
-  if (y + dy < ballRadius) {
-    dy = -dy; // Ball hits the top
-  } else if (y + dy > canvas.height - ballRadius) {
-    if (x > paddleX && x < paddleX + paddleWidth) {
-      dy = -dy; // Ball hits the paddle
+  console.log('Drawing paddle...'); // Debugging
+  if (paddle && paddle.render) {
+    paddle.render(ctx);
+  } else {
+    console.error('Paddle is undefined or does not have a render method');
+  }
+
+  console.log('Drawing bricks...'); // Debugging
+  bricks.forEach((column, c) => {
+    column.forEach((brick, r) => {
+      if (brick.status === 1) {
+        if (brick && brick.render) {
+          brick.render(ctx);
+        } else {
+          console.error(`Brick at [${c}][${r}] is undefined or does not have a render method`);
+        }
+      }
+    });
+  });
+
+  console.log('Checking collisions...'); // Debugging
+  collisionDetection();
+
+  // Update and render the score and lives labels
+  console.log('Updating labels...'); // Debugging
+  scoreLabel.text = `Score: ${score}`;
+  livesLabel.text = `Lives: ${lives}`;
+  scoreLabel.render(ctx);
+  livesLabel.render(ctx);
+
+  console.log('Updating ball position...'); // Debugging
+  if (ball.y + ball.dy < ballRadius) {
+    ball.dy = -ball.dy; // Ball hits the top
+  } else if (ball.y + ball.dy > canvas.height - ballRadius) {
+    if (ball.x > paddle.x && ball.x < paddle.x + paddleWidth) {
+      ball.dy = -ball.dy; // Ball hits the paddle
     } else {
       lives -= 1; // Player loses a life
       if (lives === 0) {
         gameOver = true;
       } else {
-        // Reset ball and paddle positions
-        x = canvas.width / 2;
-        y = canvas.height - 30;
-        dx = 2;
-        dy = -2;
-        paddleX = (canvas.width - paddleWidth) / 2;
+        ball.reset(canvas.width / 2, canvas.height - 30);
+        paddle.x = (canvas.width - paddleWidth) / 2;
       }
     }
   }
 
-  if (x + dx > canvas.width - ballRadius || x + dx < ballRadius) {
-    dx = -dx; // Ball hits side walls
+  if (ball.x + ball.dx > canvas.width - ballRadius || ball.x + ball.dx < ballRadius) {
+    ball.dx = -ball.dx; // Ball hits side walls
   }
 
   if (rightPressed) {
-    paddleX = Math.min(paddleX + 7, canvas.width - paddleWidth); // Move paddle right
+    paddle.move('right', canvas.width);
   } else if (leftPressed) {
-    paddleX = Math.max(paddleX - 7, 0); // Move paddle left
+    paddle.move('left', canvas.width);
   }
 
-  x += dx;
-  y += dy;
+  ball.move();
 
+  console.log('Requesting next frame...'); // Debugging
   requestAnimationFrame(draw);
 }
 
-// Set gameOver to false, make all the bricks a status of 1, set the x and y of the ball to their starting position, d.x and d.y need to need to be reset, along with lives and score 
 function startGame() {
   draw();
 }
