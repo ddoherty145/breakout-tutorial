@@ -82,26 +82,22 @@ function mouseMoveHandler(e) {
 }
 
 function collisionDetection() {
-  for (let c = 0; c < brickColumnCount; c += 1) {
-    for (let r = 0; r < brickRowCount; r += 1) {
-      const brick = bricks[c][r];
-      if (brick.status === 1) {
-        if (
-          ball.x > brick.x
-          && ball.x < brick.x + brickWidth
-          && ball.y > brick.y
-          && ball.y < brick.y + brickHeight
-        ) {
-          ball.dy = -ball.dy;
-          brick.status = 0;
-          score += 1;
-          if (score === brickRowCount * brickColumnCount) {
-            gameOver = true;
-          }
+  bricks.forEach((column) => {
+    column.filter((brick) => brick.status === 1).forEach((brick) => {
+      if (
+        ball.x > brick.x && ball.x < brick.x + brickWidth
+        && ball.y > brick.y && ball.y < brick.y + brickHeight
+      ) {
+        ball.dy = -ball.dy;
+        const brickIndex = bricks[column.indexOf(brick)];
+        bricks[brickIndex].status = 0;
+        score += 1;
+        if (score === brickRowCount * brickColumnCount) {
+          displayWinMessage();
         }
       }
-    }
-  }
+    });
+  });
 }
 
 function draw() {
@@ -187,6 +183,24 @@ function draw() {
 
 function startGame() {
   draw();
+}
+function displayWinMessage() {
+  const winMessage = document.createElement('div');
+  winMessage.innerText = 'Congratulations! You win!';
+  winMessage.style.position = 'absolute';
+  winMessage.style.top = '50%';
+  winMessage.style.left = '50%';
+  winMessage.style.transform = 'translate(-50%, -50%)';
+  winMessage.style.backgroundColor = '#0095DD';
+  winMessage.style.color = '#fff';
+  winMessage.style.padding = '20px';
+  winMessage.style.fontSize = '24px';
+  winMessage.style.borderRadius = '10px';
+  document.body.appendChild(winMessage);
+
+  setTimeout(() => {
+    document.location.reload();
+  }, 3000);
 }
 
 // eslint-disable-next-line func-names
