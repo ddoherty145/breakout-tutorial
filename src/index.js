@@ -1,3 +1,4 @@
+/* eslint-disable import/extensions */
 /* eslint-disable no-console */
 /* eslint-disable no-use-before-define */
 /*  global document, requestAnimationFrame */

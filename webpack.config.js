@@ -1,47 +1,22 @@
-const path = require('path');
+import path from 'path';
 
-module.exports = {
-
+export default {
   entry: './src/index.js',
-
   output: {
-
     filename: 'bundle.js',
-
-    path: path.resolve(__dirname, 'dist'),
-
+    path: path.resolve(process.cwd(), 'dist'),
   },
-
   module: {
-
     rules: [
-
       {
-
         test: /\.js$/,
-
         exclude: /node_modules/,
-
         use: {
-
           loader: 'babel-loader',
-
-          options: {
-
-            presets: ['@babel/preset-env'],
-
-          },
-
         },
-
       },
-
     ],
-
   },
-
-  devtool: 'source-map',
-
   mode: 'development',
-
+  devtool: 'source-map',
 };
