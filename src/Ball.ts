@@ -12,7 +12,7 @@ class Ball extends Sprite {
     this.dy = -2;
   }
 
-  draw(ctx) {
+  draw(ctx: CanvasRenderingContext2D) {
     ctx.beginPath();
     ctx.arc(this.x + this.radius, this.y + this.radius, this.radius, 0, Math.PI * 2);
     ctx.fillStyle = this.color;
@@ -25,7 +25,7 @@ class Ball extends Sprite {
     this.y += this.dy;
   }
 
-  reset(x, y) {
+  reset(x:number, y:number) {
     this.x = x - this.radius;
     this.y = y - this.radius;
     this.dx = 2;

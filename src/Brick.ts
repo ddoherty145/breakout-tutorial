@@ -4,7 +4,7 @@ class Brick extends Sprite {
   status: number;
   color: string;
 
-  constructor(x, y, width, height, color = 'tomato', status = 1) {
+  constructor(x:number, y:number, width:number, height:number, color = 'tomato', status = 1) {
     super(x, y, width, height, color);
     this.status = status;
     this.color = color;

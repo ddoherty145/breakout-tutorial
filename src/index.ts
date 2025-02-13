@@ -61,7 +61,7 @@ document.addEventListener('keydown', keyDownHandler, false);
 document.addEventListener('keyup', keyUpHandler, false);
 document.addEventListener('mousemove', mouseMoveHandler, false);
 
-function keyDownHandler(e) {
+function keyDownHandler(e: KeyboardEvent) {
   if (e.key === 'Right' || e.key === 'ArrowRight') {
     rightPressed = true;
   } else if (e.key === 'Left' || e.key === 'ArrowLeft') {
@@ -69,7 +69,7 @@ function keyDownHandler(e) {
   }
 }
 
-function keyUpHandler(e) {
+function keyUpHandler(e: KeyboardEvent) {
   if (e.key === 'Right' || e.key === 'ArrowRight') {
     rightPressed = false;
   } else if (e.key === 'Left' || e.key === 'ArrowLeft') {
@@ -77,7 +77,7 @@ function keyUpHandler(e) {
   }
 }
 
-function mouseMoveHandler(e) {
+function mouseMoveHandler(e: MouseEvent) {
   if (canvas) {
     const relativeX = e.clientX - canvas.offsetLeft;
     if (relativeX > 0 && relativeX < (canvas as HTMLCanvasElement).width) {

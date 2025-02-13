@@ -2,11 +2,11 @@ import Sprite from './Sprite';
 
 class Paddle extends Sprite {
 
-  constructor(x, y, width, height, color = 'tomato') {
+  constructor(x:number, y:number, width:number, height:number, color = 'tomato') {
     super(x, y, width, height, color);
   }
 
-  move(direction, canvasWidth) {
+  move(direction:string, canvasWidth:number) {
     if (direction === 'left') {
       this.x = Math.max(this.x - 7, 0);
     } else if (direction === 'right') {
