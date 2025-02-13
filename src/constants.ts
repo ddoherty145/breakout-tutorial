@@ -4,7 +4,7 @@
 
 // eslint-disable-next-line no-undef
 export const canvas = document.getElementById('myCanvas');
-export const ctx = canvas ? canvas.getContext('2d') : null;
+export const ctx = canvas instanceof HTMLCanvasElement ? canvas.getContext('2d') : null;
 export const ballRadius = 10;
 export const paddleHeight = 10;
 export const paddleWidth = 75;

@@ -18,16 +18,16 @@ import {
   brickPadding,
   brickOffsetTop,
   brickOffsetLeft,
-} from './constants.js';
+} from './constants';
 
-import Ball from './Ball.js';
-import Brick from './Brick.js';
-import Paddle from './Paddle.js';
-import Label from './Label.js';
+import Ball from './Ball';
+import Brick from './Brick';
+import Paddle from './Paddle';
+import Label from './Label';
 
 let gameOver = false;
 
-const bricks = [];
+const bricks: Brick[][] = [];
 
 for (let c = 0; c < brickColumnCount; c += 1) {
   bricks[c] = [];
@@ -39,11 +39,14 @@ for (let c = 0; c < brickColumnCount; c += 1) {
   }
 }
 
-const paddleX = (canvas.width - paddleWidth) / 2;
-const paddle = new Paddle(paddleX, canvas.height - paddleHeight, paddleWidth, paddleHeight, '#0095DD');
+if (!canvas) {
+  throw new Error('Canvas element not found');
+}
+const paddleX = ((canvas as HTMLCanvasElement).width - paddleWidth) / 2;
+const paddle = new Paddle(paddleX, (canvas as HTMLCanvasElement).height - paddleHeight, paddleWidth, paddleHeight, '#0095DD');
 console.log('Paddle initialized:', paddle); // Debugging
 
-const ball = new Ball(canvas.width / 2, canvas.height - 30, ballRadius, '#0095DD');
+const ball = new Ball((canvas as HTMLCanvasElement).width / 2, (canvas as HTMLCanvasElement).height - 30, ballRadius, '#0095DD');
 
 let rightPressed = false;
 let leftPressed = false;
@@ -52,7 +55,7 @@ let lives = 3;
 
 // Create labels for score and lives
 const scoreLabel = new Label(8, 20, `Score: ${score}`, '#0095DD', '16px Arial');
-const livesLabel = new Label(canvas.width - 65, 20, `Lives: ${lives}`, '#0095DD', '16px Arial');
+const livesLabel = new Label((canvas as HTMLCanvasElement).width - 65, 20, `Lives: ${lives}`, '#0095DD', '16px Arial');
 
 document.addEventListener('keydown', keyDownHandler, false);
 document.addEventListener('keyup', keyUpHandler, false);
@@ -75,9 +78,11 @@ function keyUpHandler(e) {
 }
 
 function mouseMoveHandler(e) {
-  const relativeX = e.clientX - canvas.offsetLeft;
-  if (relativeX > 0 && relativeX < canvas.width) {
-    paddle.x = relativeX - paddleWidth / 2;
+  if (canvas) {
+    const relativeX = e.clientX - canvas.offsetLeft;
+    if (relativeX > 0 && relativeX < (canvas as HTMLCanvasElement).width) {
+      paddle.x = relativeX - paddleWidth / 2;
+    }
   }
 }
 
@@ -89,8 +94,7 @@ function collisionDetection() {
         && ball.y > brick.y && ball.y < brick.y + brickHeight
       ) {
         ball.dy = -ball.dy;
-        const brickIndex = bricks[column.indexOf(brick)];
-        bricks[brickIndex].status = 0;
+        brick.status = 0;
         score += 1;
         if (score === brickRowCount * brickColumnCount) {
           displayWinMessage();
@@ -102,7 +106,11 @@ function collisionDetection() {
 
 function draw() {
   console.log('Drawing frame...'); // Debugging
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  if (!ctx || !canvas) {
+    console.error('Canvas or context is not available');
+    return;
+  }
+  ctx.clearRect(0, 0, (canvas as HTMLCanvasElement).width, (canvas as HTMLCanvasElement).height);
 
   if (gameOver) {
     console.log('Game over!'); // Debugging
@@ -148,33 +156,37 @@ function draw() {
   scoreLabel.render(ctx);
   livesLabel.render(ctx);
 
-  console.log('Updating ball position...'); // Debugging
+  // Ball movement logic (fixing game over condition)
   if (ball.y + ball.dy < ballRadius) {
     ball.dy = -ball.dy; // Ball hits the top
-  } else if (ball.y + ball.dy > canvas.height - ballRadius) {
+  } else if (ball.y + ball.dy > (canvas as HTMLCanvasElement).height - ballRadius) {
     if (ball.x > paddle.x && ball.x < paddle.x + paddleWidth) {
       ball.dy = -ball.dy; // Ball hits the paddle
     } else {
-      lives -= 1; // Player loses a life
+      // Ball misses the paddle
+       lives--;
       if (lives === 0) {
         gameOver = true;
       } else {
-        ball.reset(canvas.width / 2, canvas.height - 30);
-        paddle.x = (canvas.width - paddleWidth) / 2;
+        ball.reset((canvas as HTMLCanvasElement).width / 2, (canvas as HTMLCanvasElement).height - 30);
+        paddle.x = ((canvas as HTMLCanvasElement).width - paddleWidth) / 2;
       }
     }
   }
 
-  if (ball.x + ball.dx > canvas.width - ballRadius || ball.x + ball.dx < ballRadius) {
-    ball.dx = -ball.dx; // Ball hits side walls
+  // Wall collision
+  if (ball.x + ball.dx > (canvas as HTMLCanvasElement).width - ballRadius || ball.x + ball.dx < ballRadius) {
+    ball.dx = -ball.dx;
   }
 
+  // Fix duplicate paddle movement logic
   if (rightPressed) {
-    paddle.move('right', canvas.width);
+    paddle.move('right', (canvas as HTMLCanvasElement).width);
   } else if (leftPressed) {
-    paddle.move('left', canvas.width);
+    paddle.move('left', (canvas as HTMLCanvasElement).width);
   }
 
+  // Move the ball **after** all calculations
   ball.move();
 
   console.log('Requesting next frame...'); // Debugging
@@ -184,6 +196,15 @@ function draw() {
 function startGame() {
   draw();
 }
+
+const runButton = document.getElementById('runButton');
+if (runButton) {
+  runButton.addEventListener('click', function () {
+    startGame();
+    (this as HTMLButtonElement).disabled = true;
+  });
+}
+
 function displayWinMessage() {
   const winMessage = document.createElement('div');
   winMessage.innerText = 'Congratulations! You win!';
@@ -202,9 +223,3 @@ function displayWinMessage() {
     document.location.reload();
   }, 3000);
 }
-
-// eslint-disable-next-line func-names
-document.getElementById('runButton').addEventListener('click', function () {
-  startGame();
-  this.disabled = true;
-});

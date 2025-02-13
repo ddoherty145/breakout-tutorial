@@ -1,6 +1,9 @@
-import Sprite from './Sprite.js';
+import Sprite from './Sprite';
 
 class Label extends Sprite {
+  text: string;
+  font: string;
+
   constructor(x, y, text, color = 'black', font = '16px Fantasy') {
     super(x, y, 0, 0, color);
     this.text = text;

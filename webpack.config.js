@@ -1,22 +1,23 @@
 import path from 'path';
 
 export default {
-  entry: './src/index.js',
+  entry: './src/index.ts', // Entry point
   output: {
-    filename: 'bundle.js',
-    path: path.resolve(process.cwd(), 'dist'),
+    filename: 'bundle.js', // Output file
+    path: path.resolve(process.cwd(), 'dist'), // Output directory
   },
   module: {
     rules: [
       {
-        test: /\.js$/,
-        exclude: /node_modules/,
-        use: {
-          loader: 'babel-loader',
-        },
+        test: /\.ts$/, // Match TypeScript files
+        exclude: /node_modules/, // Exclude node_modules
+        use: 'ts-loader', // Use ts-loader for TypeScript
       },
     ],
   },
-  mode: 'development',
-  devtool: 'source-map',
+  resolve: {
+    extensions: ['.ts', '.js'], // Resolve .ts and .js files
+  },
+  mode: 'development', // Development mode
+  devtool: 'source-map', // Generate source maps for debugging
 };
